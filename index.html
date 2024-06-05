@@ -6,6 +6,16 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lab 9</title>
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "f729305ea90e40c89a4647b829c73591"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>
+                        
+                        
 
   <style>
     button {
@@ -88,6 +98,20 @@
   </main>
 
   <script>
+    class DivisionByZeroError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'DivisionByZeroError';
+      }
+    }
+
+    class InvalidInputError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'InvalidInputError';
+      }
+    }
+
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -95,10 +119,27 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
-    });
 
-    let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
+      try {
+        if (isNaN(firstNum) || isNaN(secondNum)) {
+          throw new InvalidInputError('Inputs must be numbers.');
+        }
+        if (operator === '/' && secondNum === '0') {
+          throw new DivisionByZeroError('Division by zero is not allowed.');
+        }
+        let result = eval(`${firstNum} ${operator} ${secondNum}`);
+        output.innerHTML = result;
+      } catch (error) {
+        if (error instanceof DivisionByZeroError || error instanceof InvalidInputError) {
+          console.error(error.name + ': ' + error.message);
+        } else {
+          console.error('An unexpected error occurred: ', error.message);
+        }
+        output.innerHTML = 'Error!';
+      } finally {
+        console.log('Calculation attempt finished.');
+      }
+    });
 
     document.getElementById("consoleLog").addEventListener("click", ()  => {
       console.log("Test");
@@ -111,9 +152,66 @@
     document.getElementById("consoleCount").addEventListener("click", ()  => {
       console.count("Count");
     });
+
+    document.getElementById("consoleWarn").addEventListener("click", ()  => {
+      console.warn("Warning");
+    });
+
+    document.getElementById("consoleAssert").addEventListener("click", ()  => {
+      const errorMsg = "the # is not even";
+      let number = 1;
+      console.assert(number % 2 === 0, "%o", { number, errorMsg });
+    });
+
+    document.getElementById("consoleClear").addEventListener("click", ()  => {
+      console.clear();
+    });
+
+    document.getElementById("consoleDir").addEventListener("click", ()  => {
+      console.dir(document);
+    });
+
+    document.getElementById("consoleDirXML").addEventListener("click", ()  => {
+      console.dirxml(document);
+    });
     
-    // You may move this JS to another file if you wish
+    document.getElementById("consoleGStart").addEventListener("click", ()  => {
+      console.group()
+    });
+
+    document.getElementById("consoleGEnd").addEventListener("click", ()  => {
+      console.groupEnd();
+    });
+
+    document.getElementById("consoleTable").addEventListener("click", ()  => {
+      console.table(["apples", "oranges", "bananas"]);
+    });
+    
+    document.getElementById("startTimer").addEventListener("click", ()  => {
+      console.time('Timer');
+    });
+
+    document.getElementById("endTimer").addEventListener("click", ()  => {
+      console.timeEnd('Timer');
+    });
+
+    document.getElementById("consoleTrace").addEventListener("click", ()  => {
+      function test() {
+        function terminal() {
+          console.trace();
+        }
+        terminal();
+      }
+      test();
+    });
+
+    document.getElementById('triggerErr').addEventListener('click', () => {
+      throw new Error('Global error triggered!');
+    });
+
+    TrackJS.track('Testing TrackJS!');
   </script>
+  
 </body>
 
 </html>
